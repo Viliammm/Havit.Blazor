@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.ComponentModel;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.JSInterop;
 
@@ -36,7 +37,13 @@ public partial class HxEChart : IAsyncDisposable
 	/// </summary>
 	[Parameter] public EventCallback<EChartClickEventArgs> OnClick { get; set; }
 
-	private readonly IJSRuntime _jsRuntime;
+	/// <summary>
+	/// Invoked when the user moves the axis pointer (e.g., when hovering over a chart).
+	/// </summary>
+	[Parameter] public EventCallback<EChartAxisPointerUpdatedEventArgs> OnAxisPointerUpdated { get; set; }
+
+	[Inject] protected IJSRuntime JSRuntime { get; set; }
+
 	private IJSObjectReference _jsModule;
 	private DotNetObjectReference<HxEChart> _dotNetObjectReference;
 	private string _currentOptions;
@@ -57,10 +64,9 @@ public partial class HxEChart : IAsyncDisposable
 		};
 	}
 
-	public HxEChart(IJSRuntime jsRuntime)
+	public HxEChart()
 	{
 		_dotNetObjectReference = DotNetObjectReference.Create(this);
-		_jsRuntime = jsRuntime;
 	}
 
 	protected override void OnParametersSet()
@@ -86,7 +92,7 @@ public partial class HxEChart : IAsyncDisposable
 				return;
 			}
 
-			await _jsModule.InvokeVoidAsync("setupChart", ChartId, _dotNetObjectReference, _currentOptions, AutoResize);
+			await _jsModule.InvokeVoidAsync("setupChart", ChartId, _dotNetObjectReference, _currentOptions, AutoResize, OnAxisPointerUpdated.HasDelegate);
 		}
 
 		_shouldSetupChartOnAfterRender = false;
@@ -95,16 +101,24 @@ public partial class HxEChart : IAsyncDisposable
 	private async Task EnsureJsModuleAsync()
 	{
 #if NET9_0_OR_GREATER
-		_jsModule ??= await _jsRuntime.InvokeAsync<IJSObjectReference>("import", Assets["./_content/Havit.Blazor.Components.Web.ECharts/HxEChart.js"]);
+		_jsModule ??= await JSRuntime.InvokeAsync<IJSObjectReference>("import", Assets["./_content/Havit.Blazor.Components.Web.ECharts/HxEChart.js"]);
 #else
-		_jsModule ??= await _jsRuntime.InvokeAsync<IJSObjectReference>("import", "./_content/Havit.Blazor.Components.Web.ECharts/HxEChart.js");
+		_jsModule ??= await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./_content/Havit.Blazor.Components.Web.ECharts/HxEChart.js");
 #endif
 	}
 
 	[JSInvokable("HandleClick")]
+	[EditorBrowsable(EditorBrowsableState.Never)]
 	public async Task HandleClick(EChartClickEventArgs eventParams)
 	{
 		await OnClick.InvokeAsync(eventParams);
+	}
+
+	[JSInvokable("HandleAxisPointerUpdate")]
+	[EditorBrowsable(EditorBrowsableState.Never)]
+	public async Task HandleAxisPointerUpdate(EChartAxisPointerUpdatedEventArgs value)
+	{
+		await OnAxisPointerUpdated.InvokeAsync(value);
 	}
 
 	async ValueTask IAsyncDisposable.DisposeAsync()

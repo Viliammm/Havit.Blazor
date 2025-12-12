@@ -211,8 +211,10 @@ public class HxMultiSelect<TValue, TItem> : HxInputBase<List<TValue>>, IInputWit
 		throw new NotSupportedException();
 	}
 
-	/// <inheritdoc cref="HxInputBase{TValue}.FocusAsync"/>
-	public override async ValueTask FocusAsync()
+	/// <summary>
+	/// Focuses the multi select component.
+	/// </summary>
+	public async ValueTask FocusAsync()
 	{
 		if (_hxMultiSelectInternalComponent == null)
 		{
@@ -220,6 +222,32 @@ public class HxMultiSelect<TValue, TItem> : HxInputBase<List<TValue>>, IInputWit
 		}
 
 		await _hxMultiSelectInternalComponent.FocusAsync();
+	}
+
+	/// <summary>
+	/// Shows the dropdown.
+	/// </summary>
+	public async Task ShowDropdownAsync()
+	{
+		if (_hxMultiSelectInternalComponent == null)
+		{
+			throw new InvalidOperationException($"[{GetType().Name}] Unable to show dropdown. The component reference is not available. You are most likely calling the method too early. The first render must complete before calling this method.");
+		}
+
+		await _hxMultiSelectInternalComponent.ShowDropdownAsync();
+	}
+
+	/// <summary>
+	/// Hides the dropdown.
+	/// </summary>
+	public async Task HideDropdownAsync()
+	{
+		if (_hxMultiSelectInternalComponent == null)
+		{
+			throw new InvalidOperationException($"[{GetType().Name}] Unable to hide dropdown. The component reference is not available. You are most likely calling the method too early. The first render must complete before calling this method.");
+		}
+
+		await _hxMultiSelectInternalComponent.HideDropdownAsync();
 	}
 
 	/// <inheritdoc/>

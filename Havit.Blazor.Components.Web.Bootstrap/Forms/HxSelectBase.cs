@@ -127,8 +127,21 @@ public abstract class HxSelectBase<TValue, TItem> : HxInputBaseWithInputGroups<T
 	/// </summary>
 	protected bool AutoSortImpl { get; set; } = true;
 
+	/// <summary>
+	/// When set, determines whether an item is disabled (non-selectable and greyed out).
+	/// When returns <c>true</c>, the corresponding option will be rendered with <c>disabled</c> attribute.
+	/// Base property for direct setup or to be re-published as <c>[Parameter] public</c>.
+	/// </summary>
+	protected Func<TItem, bool> ItemDisabledSelectorImpl { get; set; }
+
 	/// <inheritdoc cref="HxInputBase{TValue}.EnabledEffective" />
 	protected override bool EnabledEffective => base.EnabledEffective && (_itemsToRender != null);
+
+	/// <summary>
+	/// The input ElementReference.
+	/// Can be <c>null</c>. 
+	/// </summary>
+	protected ElementReference InputElement { get; set; }
 
 	private protected override string CoreInputCssClass => "form-select";
 
@@ -175,10 +188,15 @@ public abstract class HxSelectBase<TValue, TItem> : HxInputBaseWithInputGroups<T
 					if (enabledEffective || selected) /* when not enabled only selected item is rendered */
 					{
 						string text = SelectorHelpers.GetText(TextSelectorImpl, item);
+						bool disabled = SelectorHelpers.GetDisabled(ItemDisabledSelectorImpl, item);
 
 						builder.OpenElement(3000, "option");
 						builder.SetKey(i.ToString());
 						builder.AddAttribute(3001, "value", i.ToString());
+						if (disabled)
+						{
+							builder.AddAttribute(3002, "disabled", true);
+						}
 						builder.AddContent(3003, text);
 						builder.CloseElement();
 
@@ -266,4 +284,10 @@ public abstract class HxSelectBase<TValue, TItem> : HxInputBaseWithInputGroups<T
 	}
 
 	string IInputWithSize.GetInputSizeCssClass() => InputSizeEffective.AsFormSelectCssClass();
+
+	/// <summary>
+	/// Focuses the component.
+	/// </summary>
+	public async ValueTask FocusAsync() => await InputElement.FocusOrThrowAsync(this);
+
 }

@@ -203,7 +203,7 @@ public class HxAutosuggest<TItem, TValue> : HxInputBase<TValue>, IInputWithSize,
 	}
 
 	/// <inheritdoc />
-	public override async ValueTask FocusAsync()
+	public async ValueTask FocusAsync()
 	{
 		if (_hxAutosuggestInternalComponent == null)
 		{
@@ -211,15 +211,6 @@ public class HxAutosuggest<TItem, TValue> : HxInputBase<TValue>, IInputWithSize,
 		}
 
 		await _hxAutosuggestInternalComponent.FocusAsync();
-	}
-
-	/// <inheritdoc />
-	protected override void RenderChipGenerator(RenderTreeBuilder builder)
-	{
-		if (!String.IsNullOrEmpty(_hxAutosuggestInternalComponent?.ChipValue))
-		{
-			base.RenderChipGenerator(builder);
-		}
 	}
 
 	/// <inheritdoc />
