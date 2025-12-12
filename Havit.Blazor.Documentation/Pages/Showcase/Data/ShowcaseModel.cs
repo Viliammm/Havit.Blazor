@@ -11,6 +11,7 @@ public record ShowcaseModel
 	public string ProjectUrl { get; init; }
 	public string SourceCodeUrl { get; init; }
 	public string SourceCodeTitle { get; init; }
+	public bool IsMobileApp { get; init; } = false;
 
 }
 
